@@ -25,6 +25,7 @@ struct RAMMenuApp: App {
     }
     
     func getRamUsage() -> String {
+        var finalStrings: [String] = []
         var task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/vm_stat")
         
@@ -40,11 +41,33 @@ struct RAMMenuApp: App {
         var outputString = "\(String(decoding: outputData, as: UTF8.self))"
         do {
             let regex = try NSRegularExpression(pattern: "(?:(?:\\b *)*([1234567890]+).)")
-            regex.matches(in: outputString, range: NSRange(location: 0, length: outputString.count))
+            let matches = regex.matches(in: outputString, range: NSRange(location: 0, length: outputString.count))
+            var result: [[String]] = []
+            for match in matches {
+                var groups: [String] = []
+                for rangeIndex in 1 ..< match.numberOfRanges {
+                    let nsRange = match.range(at: rangeIndex)
+                    guard !NSEqualRanges(nsRange, NSMakeRange(NSNotFound, 0)) else { continue }
+                    let string = (outputString as NSString).substring(with: nsRange)
+                    groups.append(string)
+                }
+                if !groups.isEmpty {
+                    result.append(groups)
+                }
+            }
+            print (result)
+            finalStrings.append(result[1][0])
+            finalStrings.append(result[3][0])
         } catch {
             print("error \(error)")
         }
+        let num1 = ((Int(finalStrings[0]) ?? -1)*16384)
+        let num2 = ((Int(finalStrings[1]) ?? -1)*16384)
+        let num3 = num1 + num2
+        let num4 = processInfo.physicalMemory
+        let num5 = (((num4 - UInt64(num3))/1024)/1024)/1000
         
-        return outputString
+        
+        return String(num5)
     }
 }

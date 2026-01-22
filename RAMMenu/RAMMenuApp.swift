@@ -77,7 +77,7 @@ struct RAMMenuApp: App {
             trimmed.removeLast()
         }
 //        print(command + " -> " + trimmed)
-        
+        process.terminate()
         return Double(trimmed) ?? 0.0
     }
 }

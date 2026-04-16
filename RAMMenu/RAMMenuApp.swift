@@ -18,7 +18,7 @@ struct RAMMenuApp: App {
             
             Text("Total Ram: \(getTotalRam())GB")
             Text("Ram Usage: \(ramUsage)GB : \(String(format:"%.2f",((Double(ramUsage) ?? 1.0) / Double(getTotalRam()) * 100)))% used")
-            Text("Swap Usage: \(swapUsage)MB")
+            Text("Swap Usage: \(swapUsage)GB")
             
             Divider().onAppear {
                 ramUsage = getRamUsage()
@@ -54,7 +54,7 @@ struct RAMMenuApp: App {
     
     func getSwapUsage() -> String {
         let swapUsage = runCommand("sysctl vm.swapusage | awk '/ used/ { print $7 }'")
-        return "\(swapUsage)"
+        return "\(String(format: "%.2f",(swapUsage / 1000)))"
     }
     
     func runCommand(_ command: String) -> Double {

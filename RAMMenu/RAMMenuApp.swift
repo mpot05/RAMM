@@ -10,14 +10,13 @@ import Darwin
 
 @main
 struct RAMMenuApp: App {
-    @State var currentNumber: String = "1"
     @State var processInfo = ProcessInfo.processInfo
     @State var ramUsage: String = ""
     @State var swapUsage: String = ""
     var body: some Scene {
-        MenuBarExtra(currentNumber, systemImage: "memorychip") {
-            Text("Total Ram: \(processInfo.physicalMemory/1024/1024/1000)GB")
-            Text("Ram Usage: \(ramUsage)GB")
+        MenuBarExtra("", systemImage: "memorychip") {
+            Text("Total Ram: \(getTotalRam())GB")
+            Text("Ram Usage: \(ramUsage)GB : \(String(format:"%.2f",((Double(ramUsage) ?? 1.0) / Double(getTotalRam()) * 100)))% used")
             Text("Swap Usage: \(swapUsage)MB")
             Divider().onAppear {
                 ramUsage = getRamUsage()
@@ -33,18 +32,16 @@ struct RAMMenuApp: App {
         }.menuBarExtraStyle(.automatic)
     }
     
+    func getTotalRam() -> UInt64 {
+        return processInfo.physicalMemory/1024/1024/1000
+    }
+    
     func getRamUsage() -> String {
         
         let hw_pagesize = runCommand("sysctl -n hw.pagesize")
-//        print("hw_pagesize: " + "\(hw_pagesize)")
-//        let mem_total = runCommand("sysctl -n hw.memsize") / 1024 / 1024
-//        print("mem_total: " + "\(mem_total)")
         let pages_app = runCommand("sysctl -n vm.page_pageable_internal_count") - runCommand("sysctl -n vm.page_purgeable_count")
-//        print("pages_app: " + "\(pages_app)")
         let pages_wired = runCommand("vm_stat | awk '/ wired/ { print $4 }'")
-//        print("pages_wired: " + "\(pages_wired)")
         let pages_compressed = runCommand("vm_stat | awk '/occupied/ { print $5 }'")
-//        print("pages_compressed: " + "\(pages_compressed)")
         var mem_used = ((pages_app + pages_wired + pages_compressed) * hw_pagesize) / 1024 / 1024 / 1000
         
         mem_used = Double(round(100 * mem_used) / 100)
@@ -76,7 +73,6 @@ struct RAMMenuApp: App {
         if command == "sysctl vm.swapusage | awk '/ used/ { print $7 }'" {
             trimmed.removeLast()
         }
-//        print(command + " -> " + trimmed)
         process.terminate()
         return Double(trimmed) ?? 0.0
     }

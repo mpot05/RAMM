@@ -14,10 +14,12 @@ struct RAMMenuApp: App {
     @State var ramUsage: String = ""
     @State var swapUsage: String = ""
     var body: some Scene {
-        MenuBarExtra("", systemImage: "memorychip") {
+        MenuBarExtra {
+            
             Text("Total Ram: \(getTotalRam())GB")
             Text("Ram Usage: \(ramUsage)GB : \(String(format:"%.2f",((Double(ramUsage) ?? 1.0) / Double(getTotalRam()) * 100)))% used")
             Text("Swap Usage: \(swapUsage)MB")
+            
             Divider().onAppear {
                 ramUsage = getRamUsage()
                 swapUsage = getSwapUsage()
@@ -26,10 +28,12 @@ struct RAMMenuApp: App {
                     swapUsage = getSwapUsage()
                 }
             }
+            
             Button("Quit") {
                 NSApplication.shared.terminate(self)
             }.keyboardShortcut("q")
-        }.menuBarExtraStyle(.automatic)
+            
+        } label: { Image(systemName: "memorychip") }.menuBarExtraStyle(.automatic)
     }
     
     func getTotalRam() -> UInt64 {
